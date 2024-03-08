@@ -1,5 +1,5 @@
 chrome.downloads.onDeterminingFilename.addListener(function(item, suggest) {
-    
+    displayDownloadedFiles();
     chrome.storage.sync.get('rules', function(data) {
       var rules = data.rules || [];
       var extension = item.filename.substring(item.filename.lastIndexOf('.'));
@@ -14,7 +14,7 @@ chrome.downloads.onDeterminingFilename.addListener(function(item, suggest) {
     });
   });  
 
-
+  function displayDownloadedFiles() {
   chrome.downloads.onChanged.addListener(function(downloadDelta) {
     if (downloadDelta.state && downloadDelta.state.current === 'complete') {
       chrome.downloads.search({id: downloadDelta.id}, function(downloadItems) {
@@ -22,9 +22,10 @@ chrome.downloads.onDeterminingFilename.addListener(function(item, suggest) {
           var downloadItem = downloadItems[0];
           var downloadPath = downloadItem.filename;
           console.log('Downloaded file path:', downloadPath);
-          // Handle the download path as needed
         }
       });
     }
   });
+
+}
   
