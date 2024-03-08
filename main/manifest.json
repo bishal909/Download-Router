@@ -3,7 +3,7 @@
     "name": "Download Router",
     "version": "1.0",
     "description": "Automatically move downloads to different directories based on file type.",
-    "permissions": ["downloads"],
+    "permissions": ["downloads","storage"],
     "background": {
       "service_worker": "background.js"
     },

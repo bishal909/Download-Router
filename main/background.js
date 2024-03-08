@@ -6,6 +6,9 @@ chrome.downloads.onDeterminingFilename.addListener(function(item, suggest) {
       if (rule) {
         var destinationDir = rule.location;
         suggest({filename: destinationDir + '/' + item.filename, conflictAction: 'overwrite'});
+      } else {
+        // No rule found, fall back to default download behavior
+        suggest({filename: item.filename, conflictAction: 'uniquify'});
       }
     });
-});  
+  });  
