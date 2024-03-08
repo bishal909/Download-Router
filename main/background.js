@@ -1,31 +1,29 @@
 chrome.downloads.onDeterminingFilename.addListener(function(item, suggest) {
-    displayDownloadedFiles();
-    chrome.storage.sync.get('rules', function(data) {
-      var rules = data.rules || [];
-      var extension = item.filename.substring(item.filename.lastIndexOf('.'));
-      var rule = rules.find(r => r.extension === extension);
-      if (rule) {
-        var destinationDir = rule.location;
-        suggest({filename: destinationDir + '/' + item.filename, conflictAction: 'overwrite'});
-      } else {
-        // No rule found, fall back to default download behavior
-        suggest({filename: item.filename, conflictAction: 'uniquify'});
-      }
+    var extension = item.filename.substring(item.filename.lastIndexOf('.'));
+    var destinationDir = '';
+  
+    // Define destination directories for different file extensions
+    switch (extension) {
+      case '.pdf':
+        destinationDir = 'PDFs';
+        break;
+      case '.jpg':
+      case '.png':
+        destinationDir = 'Images';
+        break;
+      default:
+        destinationDir = 'Other';
+        break;
+    }
+  
+    // Create the destination directory if it doesn't exist
+    chrome.downloads.download({
+      url: 'filesystem:' + chrome.runtime.id + '/temporary', // Dummy URL for directory creation
+      filename: destinationDir + '/', // Append trailing slash to indicate a directory
+      conflictAction: 'overwrite',
+      saveAs: false
+    }, function(downloadId) {
+      // Suggest the new filename with the created directory
+      suggest({filename: destinationDir + '/' + item.filename, conflictAction: 'overwrite'});
     });
   });  
-
-  function displayDownloadedFiles() {
-  chrome.downloads.onChanged.addListener(function(downloadDelta) {
-    if (downloadDelta.state && downloadDelta.state.current === 'complete') {
-      chrome.downloads.search({id: downloadDelta.id}, function(downloadItems) {
-        if (downloadItems && downloadItems.length > 0) {
-          var downloadItem = downloadItems[0];
-          var downloadPath = downloadItem.filename;
-          console.log('Downloaded file path:', downloadPath);
-        }
-      });
-    }
-  });
-
-}
-  
