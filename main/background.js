@@ -16,21 +16,14 @@ chrome.downloads.onDeterminingFilename.addListener(function(item, suggest) {
         break;
     }
   
-    // Check if the destination directory exists, create it if it doesn't
-    chrome.downloads.search({filenameRegex: '^' + destinationDir + '$'}, function(existingItems) {
-      if (existingItems.length === 0) {
-        chrome.downloads.download({
-          filename: destinationDir, // Directory name
-          conflictAction: 'overwrite',
-          saveAs: false
-        }, function(downloadId) {
-          if (downloadId !== undefined) {
-            suggest({filename: destinationDir + '/' + item.filename, conflictAction: 'overwrite'});
-          }
-        });
-      } else {
+    // Obtain the extension directory and create the destination subdirectory
+    chrome.runtime.getPackageDirectoryEntry(function(directoryEntry) {
+      directoryEntry.getDirectory(destinationDir, {create: true}, function() {
+        // Once the directory is created (or if it already exists), suggest the new filename with the directory path
         suggest({filename: destinationDir + '/' + item.filename, conflictAction: 'overwrite'});
-      }
+      }, function(error) {
+        console.error('Error creating directory:', error);
+      });
     });
   
     // Return true to indicate that suggestCallback will be called asynchronously
