@@ -19,5 +19,10 @@
         "48": "icon.png",
         "128": "icon.png"
       }
+    },
+    "options_ui": {
+      "page": "options.html",
+      "open_in_tab": true
     }
-}  
+}
+  
