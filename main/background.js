@@ -16,14 +16,23 @@ chrome.downloads.onDeterminingFilename.addListener(function(item, suggest) {
         break;
     }
   
-    // Create the destination directory if it doesn't exist
-    chrome.downloads.download({
-      url: 'filesystem:' + chrome.runtime.id + '/temporary', // Dummy URL for directory creation
-      filename: destinationDir + '/', // Append trailing slash to indicate a directory
-      conflictAction: 'overwrite',
-      saveAs: false
-    }, function(downloadId) {
-      // Suggest the new filename with the created directory
-      suggest({filename: destinationDir + '/' + item.filename, conflictAction: 'overwrite'});
+    // Check if the destination directory exists, create it if it doesn't
+    chrome.downloads.search({filenameRegex: '^' + destinationDir + '$'}, function(existingItems) {
+      if (existingItems.length === 0) {
+        chrome.downloads.download({
+          filename: destinationDir, // Directory name
+          conflictAction: 'overwrite',
+          saveAs: false
+        }, function(downloadId) {
+          if (downloadId !== undefined) {
+            suggest({filename: destinationDir + '/' + item.filename, conflictAction: 'overwrite'});
+          }
+        });
+      } else {
+        suggest({filename: destinationDir + '/' + item.filename, conflictAction: 'overwrite'});
+      }
     });
+  
+    // Return true to indicate that suggestCallback will be called asynchronously
+    return true;
   });  
